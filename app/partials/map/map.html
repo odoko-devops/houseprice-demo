@@ -1,0 +1,28 @@
+<div class="container">
+  <div class="row">
+    <div class="col-md-12" ng-if="sales">
+      <ui-gmap-google-map bounds="" center="'0,0'" zoom="" pan="" events="{bounds_changed: drag}">
+        <ui-gmap-markers models="markers"
+                         fit="true"
+                         type="cluster"
+                         coords="'self'"
+                         icon="'icon'"
+                         click="click">
+          <ui-gmap-windows show="showPopup"
+                  closeClick="showPopup=false">
+            <div ng-non-bindable>
+              <div ng-if="{{title.name}}">{{title.name}},</div>
+              <div ng-if="title.number || title.street">{{title.number}} {{title.street}}, </div>
+              <div ng-if="title.locality">{{title.locality}},</div>
+              <div ng-if="title.town">{{title.town}}, </div>
+              <div ng-if="title.district">{{title.district}}, </div>
+              <div ng-if="title.county">{{title.county}}, </div>
+              <div ng-if="title.postcode">{{title.postcode}}</div>
+            </div>
+          </ui-gmap-windows>
+        </ui-gmap-markers>
+
+      </ui-gmap-google-map>
+    </div>
+  </div>
+</div>

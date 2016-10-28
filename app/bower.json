@@ -1,0 +1,15 @@
+{
+  "name": "odoko-houseprices",
+  "description": "A Sample Application to demonstrate Dockerisation",
+  "version": "0.0.0",
+  "homepage": "https://github.com/odoko-devops/houseprices",
+  "license": "AL2.0",
+  "private": false,
+  "dependencies": {
+    "angular": "~1.5.0",
+    "angular-route": "~1.5.0",
+    "angular-resource": "~1.5.0",
+    "angular-google-maps":"~2.3.3",
+    "bootstrap": "^3.3.6"
+  }
+}

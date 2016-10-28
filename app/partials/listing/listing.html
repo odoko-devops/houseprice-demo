@@ -1,0 +1,27 @@
+<div class="panel panel-default" ng-show="sales">
+    <h2>Results</h2>
+    <div class="container-fluid">
+    <div class="row" ng-repeat="sale in sales">
+        <div class="col-md-2">{{sale.postcode}}</div>
+        <div class="col-md-6">
+            <span ng-if="sale.name">{{sale.name}},</span>
+            <span ng-if="sale.number || sale.street">{{sale.number}} {{sale.street}}, </span>
+            <span ng-if="sale.locality">{{sale.locality}},</span>
+            <span ng-if="sale.town">{{sale.town}}, </span>
+            <span ng-if="sale.district">{{sale.district}}, </span>
+            <span ng-if="sale.county">{{sale.county}}, </span>
+            <span ng-if="sale.postcode">{{sale.postcode}}</span>
+
+<!--	     "property_type_s": "type",
+	     "duration_s": "duration",
+	     "ppd_s": "ppd",
+	     "age_s": "age",
+	     "status_s": "status",
+         "location": "location"}-->
+        </div>
+        <div class="col-md-2">&pound;{{sale.price | number}}</div>
+        <div class="col-md-2">{{sale.date | date}}</div>
+    </div>
+        <button type="button" ng-click="more()" class="btn btn-default">More</button>
+        </div>
+</div>
