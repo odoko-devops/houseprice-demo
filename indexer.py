@@ -5,6 +5,8 @@ import requests
 from StringIO import StringIO
 import pysolr
 import os
+import zipfile
+import io
 
 POSTCODE_ZIP="https://www.freemaptools.com/download/full-postcodes/ukpostcodes.zip"
 
@@ -32,14 +34,21 @@ BATCH_SIZE=1000
 
 #"{34428D7D-BD85-B86C-E050-A8C06205059C}","275000","2004-04-01 00:00","RG12 7BD","D","N","F","CALCOT HOUSE","","RECTORY CLOSE","","BRACKNELL","BRACKNELL FOREST","BRACKNELL FOREST","A","A"
 
+def download_postcodes(url="https://www.freemaptools.com/download/full-postcodes/ukpostcodes.zip"):
+  print "Downloading postcodes..."
+  resp = requests.get(url)
+  f = io.BytesIO(resp.content)
+  z = zipfile.ZipFile(f)
+  print "Unzipping..."
+  data = z.read("ukpostcodes.csv")
 
-def import_postcodes(file="ukpostcodes.csv"):
+  print "Extracting..."
   postcodes = {}
-  with open(file) as f:
-    f.readline() # skip header
-    for line in f:
+  for line in data.split("\n")[1:]:
+    if len(line.strip())>0:
       id, postcode, lat, lng = line.strip().split(",")
       postcodes[postcode] = "%s,%s" % (lat, lng)
+  print "Found %d postcodes" % len(postcodes.keys())
   return postcodes
 
 
@@ -120,13 +129,13 @@ def resolve_zookeeper_string():
 
 
 def index():
+  print "Importing postcodes"
+  pc = download_postcodes()
+  print "Imported %s postcodes" % len(pc.keys())
+
   zk = resolve_zookeeper_string()
   print "USING %s" % zk
   solr = pysolr.SolrCloud(pysolr.ZooKeeper(zk), "houseprices")
-
-  print "Importing postcodes"
-  pc = import_postcodes()
-  print "Imported %s postcodes" % len(pc.keys())
 
   count = import_houses(pc, solr)
   print "%s prices imported" % count
