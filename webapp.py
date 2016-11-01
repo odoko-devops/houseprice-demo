@@ -24,9 +24,26 @@ FIELD_NAMES={
          "location": "location"}
 FIELD_ARRAYS=["saon_t", "paon_t", "street_t", "locality_t", "town_t", "district_t", "county_t"]
 
+def resolve_zookeeper_string():
+    zk_host = os.environ.get("ZK_HOST", "zookeeper")
+    zk_port = os.environ.get("ZK_PORT", "2181")
+    zk_chroot = os.environ.get("ZK_CHROOT", "/solr")
+
+    if "," in zk_host:
+        return ",".join(["%s:%s" % (ip, zk_port) for ip in zk_host.split(",")]) + zk_chroot
+    try:
+        dummy, dummy, addresses = socket.gethostbyname_ex(zk_host)
+    except:
+        addresses = []
+    if len(addresses)<2:
+        return "%s:%s%s" % (zk_host, zk_port, zk_chroot)
+    else:
+        addresses = ["%s:%s" % (ip, zk_port) for ip in addresses]
+        return ",".join(addresses) + zk_chroot
+
 @app.before_first_request
 def before_first_request():
-  zk = os.environ.get("ZOOKEEPER")
+  zk = resolve_zookeeper_string()
   app.solr = pysolr.SolrCloud(pysolr.ZooKeeper(zk), "houseprices")
 
 @app.route("/")
