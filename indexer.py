@@ -129,10 +129,78 @@ def resolve_zookeeper_string():
         return ",".join(addresses) + zk_chroot
 
 
+def get_zookeeper_hosts():
+    zookeeper = os.environ.get("ZK_HOST", "zookeeper")
+
+    zk_hosts = []
+    if "," in zookeeper:
+      zk_hosts = zookeeper.split(",")
+    else:
+        try:
+            dummy, dummy, addresses = socket.gethostbyname_ex(zk_host)
+        except:
+            addresses = []
+        if len(addresses)==0:
+            zk_hosts = [zookeeper]
+        else:
+            zk_hosts.extend(addresses)
+
+    return zk_hosts
+
+
+def get_zookeeper_status(zk_host, zk_port):
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(2)
+
+    try:
+        s.connect(zk_host, zk_port)
+
+        print "Connecting to %s:%s" % (zk_host, zk_port)
+        s.sendall("srvr\n")
+        data = s.recv(4096)
+        lines = repr(data).split("\n")
+        for line in lines:
+            if line.startswith("Mode:"):
+                mode = line[len("Mode: "):]
+                s.close()
+                return mode
+    except Exception, e:
+        print "Caught exception: %s" % e
+        return "missing"
+
+    return "missing"
+
+
+def wait_for_quorum():
+    zk_port = int(os.getenv("ZK_PORT", "2181"))
+    zk_hosts = get_zookeeper_hosts()
+    is_single = len(zk_hosts) == 1;
+    while True:
+      if is_single:
+          host = zk_hosts[0]
+          if get_zookeeper_status(host, zk_port) == "standalone":
+              return
+      else:
+        active_count = 0;
+        for zk_host in zk_hosts:
+          status = get_zookeeper_status(zk_host, zk_port);
+          if status == "leader" or status == "observer" or status == "follower":
+            active_count+=1;
+
+        if active_count == len(zk_hosts):
+          return
+        else:
+          print "%s out of %s ZooKeeper hosts active. Waiting" % (active_count, len(zk_hosts))
+          time.sleep(5000)
+
+
 def index():
   print "Importing postcodes"
   pc = download_postcodes()
   print "Imported %s postcodes" % len(pc.keys())
+
+  wait_for_quorum()
 
   zk = resolve_zookeeper_string()
   print "USING %s" % zk
