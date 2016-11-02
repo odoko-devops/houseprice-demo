@@ -155,7 +155,7 @@ def get_zookeeper_status(zk_host, zk_port):
     s.settimeout(2)
 
     try:
-        s.connect(zk_host, zk_port)
+        s.connect((zk_host, zk_port))
 
         print "Connecting to %s:%s" % (zk_host, zk_port)
         s.sendall("srvr\n")
