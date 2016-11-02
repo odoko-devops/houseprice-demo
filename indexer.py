@@ -113,7 +113,7 @@ def import_houses(postcodes, solr, file="pp-monthly-update-new-version.csv"):
   return cnt
 
 def resolve_zookeeper_string():
-    zk_host = os.environ.get("ZK_HOST", "zookeeper")
+    zk_host = os.environ.get("ZOOKEEPER", "zookeeper")
     zk_port = os.environ.get("ZK_PORT", "2181")
     zk_chroot = os.environ.get("ZK_CHROOT", "/solr")
 
@@ -131,7 +131,7 @@ def resolve_zookeeper_string():
 
 
 def get_zookeeper_hosts():
-    zookeeper = os.environ.get("ZK_HOST", "zookeeper")
+    zookeeper = os.environ.get("ZOOKEEPER", "zookeeper")
 
     zk_hosts = []
     if "," in zookeeper:
@@ -177,12 +177,15 @@ def get_zookeeper_status(zk_host, zk_port):
 def wait_for_quorum():
     zk_port = int(os.getenv("ZK_PORT", "2181"))
     zk_hosts = get_zookeeper_hosts()
+    print "Checking %s" % zk_hosts
     is_single = len(zk_hosts) == 1;
     while True:
       if is_single:
-          host = zk_hosts[0]
-          if get_zookeeper_status(host, zk_port) == "standalone":
+          zk_host = zk_hosts[0]
+          if get_zookeeper_status(zk_host, zk_port) == "standalone":
               return
+          else:
+              print "Waiting for single host to start"
       else:
         active_count = 0;
         for zk_host in zk_hosts:
@@ -194,7 +197,7 @@ def wait_for_quorum():
           return
         else:
           print "%s out of %s ZooKeeper hosts active. Waiting" % (active_count, len(zk_hosts))
-          time.sleep(5)
+    time.sleep(5)
 
 
 def index():
