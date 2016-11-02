@@ -8,6 +8,7 @@ import os
 import zipfile
 import io
 import time
+import socket
 
 POSTCODE_ZIP="https://www.freemaptools.com/download/full-postcodes/ukpostcodes.zip"
 
