@@ -7,6 +7,7 @@ import pysolr
 import os
 import zipfile
 import io
+import time
 
 POSTCODE_ZIP="https://www.freemaptools.com/download/full-postcodes/ukpostcodes.zip"
 
@@ -135,7 +136,13 @@ def index():
 
   zk = resolve_zookeeper_string()
   print "USING %s" % zk
-  solr = pysolr.SolrCloud(pysolr.ZooKeeper(zk), "houseprices")
+  while True:
+    try:
+      solr = pysolr.SolrCloud(pysolr.ZooKeeper(zk), "houseprices")
+      break
+    except Exception, e:
+      print "Solr connection failed, waiting: %s" % e
+      time.sleep(5)
 
   count = import_houses(pc, solr)
   print "%s prices imported" % count
