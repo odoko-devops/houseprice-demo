@@ -21,6 +21,7 @@ RUN pip install \
             splinter \
 	    Flask \
 	    kazoo \
+	    dnspython==1.15.0 \
 	    requests && \
     mkdir /houses
 

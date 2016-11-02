@@ -9,6 +9,7 @@ import zipfile
 import io
 import time
 import socket
+import dns.resolver
 
 POSTCODE_ZIP="https://www.freemaptools.com/download/full-postcodes/ukpostcodes.zip"
 
@@ -138,7 +139,9 @@ def get_zookeeper_hosts():
       zk_hosts = zookeeper.split(",")
     else:
         try:
-            dummy, dummy, addresses = socket.gethostbyname_ex(zk_host)
+            names = dns.resolver.query(zookeeper, "A")
+            for name in names:
+                zk_hosts.append(str(name))
         except:
             addresses = []
         if len(addresses)==0:
@@ -197,15 +200,15 @@ def wait_for_quorum():
           return
         else:
           print "%s out of %s ZooKeeper hosts active. Waiting" % (active_count, len(zk_hosts))
-    time.sleep(5)
+      time.sleep(5)
 
 
 def index():
+  wait_for_quorum()
   print "Importing postcodes"
   pc = download_postcodes()
   print "Imported %s postcodes" % len(pc.keys())
 
-  wait_for_quorum()
 
   zk = resolve_zookeeper_string()
   print "USING %s" % zk
