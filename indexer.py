@@ -143,11 +143,10 @@ def get_zookeeper_hosts():
             for name in names:
                 zk_hosts.append(str(name))
         except:
+            pass # do nothing
             addresses = []
-        if len(addresses)==0:
+        if len(zk_hosts)==0:
             zk_hosts = [zookeeper]
-        else:
-            zk_hosts.extend(addresses)
 
     return zk_hosts
 
