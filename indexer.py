@@ -155,12 +155,12 @@ def get_zookeeper_status(zk_host, zk_port):
     s.settimeout(2)
 
     try:
+        print "Connecting to %s:%s" % (zk_host, zk_port)
         s.connect((zk_host, zk_port))
 
-        print "Connecting to %s:%s" % (zk_host, zk_port)
         s.sendall("srvr\n")
         data = s.recv(4096)
-        lines = repr(data).split("\n")
+        lines = repr(data).split("\\n")
         for line in lines:
             if line.startswith("Mode:"):
                 mode = line[len("Mode: "):]
@@ -170,6 +170,7 @@ def get_zookeeper_status(zk_host, zk_port):
         print "Caught exception: %s" % e
         return "missing"
 
+    print "Zookeeper not found."
     return "missing"
 
 
@@ -193,7 +194,7 @@ def wait_for_quorum():
           return
         else:
           print "%s out of %s ZooKeeper hosts active. Waiting" % (active_count, len(zk_hosts))
-          time.sleep(5000)
+          time.sleep(5)
 
 
 def index():
