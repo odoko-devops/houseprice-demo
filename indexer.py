@@ -104,9 +104,16 @@ def import_houses(postcodes, solr, file="pp-monthly-update-new-version.csv"):
     docs.append(doc)
 
     if len(docs)>=BATCH_SIZE:
-      solr.add(docs)
-      print "Imported %s prices. Total %s" % (len(docs), cnt)
-      docs=[]
+        while True:
+            try:
+                solr.add(docs)
+                break
+            except Exception, e:
+                print "Exception indexing documents: %s" % e
+                time.sleep(5000)
+
+        print "Imported %s prices. Total %s" % (len(docs), cnt)
+        docs=[]
 
   if len(docs)>0:
     solr.add(docs)
