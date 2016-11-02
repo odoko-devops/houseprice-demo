@@ -121,7 +121,7 @@ def resolve_zookeeper_string():
     if "," in zk_host:
         return ",".join(["%s:%s" % (ip, zk_port) for ip in zk_host.split(",")]) + zk_chroot
     try:
-        dummy, dummy, addresses = socket.gethostbyname_ex(zk_host)
+        addresses = [str(name) for name in dns.resolver.query(zk_host, "A")]
     except:
         addresses = []
     if len(addresses)<2:
@@ -144,7 +144,7 @@ def get_zookeeper_hosts():
                 zk_hosts.append(str(name))
         except:
             pass # do nothing
-            addresses = []
+            zk_hosts = []
         if len(zk_hosts)==0:
             zk_hosts = [zookeeper]
 
@@ -196,7 +196,8 @@ def wait_for_quorum():
             active_count+=1;
 
         if active_count == len(zk_hosts):
-          return
+            print "All %s ZooKeeper hosts active" % len(zk_hosts)
+            return
         else:
           print "%s out of %s ZooKeeper hosts active. Waiting" % (active_count, len(zk_hosts))
       time.sleep(5)
